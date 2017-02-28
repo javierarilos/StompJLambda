@@ -11,4 +11,12 @@ public class StompClientTest extends TestCase{
         assertEquals("someuser", client.getUsr());
         assertEquals("somepass", client.getPass());
     }
+
+    public void testConnect() {
+        StompClient client = new StompClient();
+        client.connect();
+
+        assertTrue(client.isConnected());
+
+    }
 }

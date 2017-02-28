@@ -6,6 +6,12 @@ public class StompClient {
     private String usr = "guest";
     private String pass = "guest";
 
+    private boolean connected = false;
+
+    public void connect() {
+        this.connected = true;
+    }
+
     public StompClient(String host, int port, String usr, String pass) {
         this(host, port);
         this.usr = usr;
@@ -19,6 +25,9 @@ public class StompClient {
 
     public StompClient(String host) {
         this.host = host;
+    }
+
+    public StompClient() {
     }
 
     public String getHost() {
@@ -36,4 +45,10 @@ public class StompClient {
     public String getPass() {
         return pass;
     }
+
+
+    public boolean isConnected() {
+        return connected;
+    }
+
 }
