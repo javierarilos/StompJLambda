@@ -2,6 +2,7 @@ package io.stompjlambda;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Frame class represents a frame according to the Stomp 1.2 protocol:
@@ -13,9 +14,24 @@ class Frame {
     private final Map<String, String> headers;
     private final String body;
 
+    public static Frame newConnectFrame(String host, String login, String passcode, int heartBeat) {
+        Map<String, String> headers = getMandatoryHeaders(host);
+        headers.put("login", login);
+        headers.put("passcode", passcode);
+        headers.put("heart-beat", String.valueOf(heartBeat));
+        return new Frame(ClientCommand.CONNECT, headers);
+    }
+
     public String serialize() {
         String serializedHeaders = serializeHeaders();
         return String.format(FRAME_TMPLT, command, serializedHeaders, body);
+    }
+
+    private static Map<String,String> getMandatoryHeaders(String host) {
+        Map<String, String> headers = new TreeMap<String, String>();
+        headers.put("accept-version", "1.2");
+        headers.put("host", host);
+        return headers;
     }
 
     private String serializeHeaders() {
