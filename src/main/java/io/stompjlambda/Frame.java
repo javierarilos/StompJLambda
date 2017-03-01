@@ -8,14 +8,16 @@ import java.util.TreeMap;
  * Frame class represents a frame according to the Stomp 1.2 protocol:
  * https://stomp.github.io/stomp-specification-1.2.html#STOMP_Frames
  */
-class Frame {
+public class Frame {
     private static final String FRAME_TMPLT = "%s\n%s\n%s\0";
     private final Command command;
     private final Map<String, String> headers;
     private final String body;
 
     public static Frame newConnectFrame(String host, String login, String passcode, int heartBeat) {
-        Map<String, String> headers = getMandatoryHeaders(host);
+        Map<String, String> headers = new TreeMap<String, String>();
+        headers.put("accept-version", "1.2");
+        headers.put("host", host);
         headers.put("login", login);
         headers.put("passcode", passcode);
         headers.put("heart-beat", String.valueOf(heartBeat));
@@ -25,13 +27,6 @@ class Frame {
     public String serialize() {
         String serializedHeaders = serializeHeaders();
         return String.format(FRAME_TMPLT, command, serializedHeaders, body);
-    }
-
-    private static Map<String,String> getMandatoryHeaders(String host) {
-        Map<String, String> headers = new TreeMap<String, String>();
-        headers.put("accept-version", "1.2");
-        headers.put("host", host);
-        return headers;
     }
 
     private String serializeHeaders() {

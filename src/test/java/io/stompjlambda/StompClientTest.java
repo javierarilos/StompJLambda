@@ -12,8 +12,9 @@ public class StompClientTest extends TestCase{
         assertEquals("somepass", client.getPass());
     }
 
-    public void testConnect() {
+    public void testFakeConnect() throws StompException {
         StompClient client = new StompClient();
+        client.setTransport(StompStreamFactory.TRANSPORT_FAKE);
         client.connect();
 
         assertTrue(client.isConnected());
