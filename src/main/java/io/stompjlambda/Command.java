@@ -1,6 +1,6 @@
 package io.stompjlambda;
 
-public enum ClientCommand {
+public enum Command {
     SEND("SEND"),
     SUBSCRIBE("SUBSCRIBE"),
     BEGIN("BEGIN"),
@@ -14,7 +14,7 @@ public enum ClientCommand {
 
     private final String command;
 
-    private ClientCommand(final String text) {
+    private Command(final String text) {
         this.command = text;
     }
 

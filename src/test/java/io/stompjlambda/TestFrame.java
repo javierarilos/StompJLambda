@@ -9,7 +9,7 @@ public class TestFrame extends TestCase {
     public void testFrameConstructor() {
         Frame frame = createSendFrame();
 
-        assertEquals(ClientCommand.SEND, frame.getCommand());
+        assertEquals(Command.SEND, frame.getCommand());
         assertTrue(frame.getHeaders().containsKey("header1"));
         assertTrue(frame.getHeaders().containsKey("header2"));
         assertEquals("value1", frame.getHeaders().get("header1"));
@@ -29,7 +29,7 @@ public class TestFrame extends TestCase {
         headers.put("header1", "value1");
         headers.put("header2", "value2");
         String body = "some stomp message body contents";
-        return new Frame(ClientCommand.SEND, headers, body);
+        return new Frame(Command.SEND, headers, body);
     }
 
 

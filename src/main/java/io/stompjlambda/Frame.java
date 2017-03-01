@@ -10,7 +10,7 @@ import java.util.TreeMap;
  */
 class Frame {
     private static final String FRAME_TMPLT = "%s\n%s\n%s\0";
-    private final ClientCommand command;
+    private final Command command;
     private final Map<String, String> headers;
     private final String body;
 
@@ -19,7 +19,7 @@ class Frame {
         headers.put("login", login);
         headers.put("passcode", passcode);
         headers.put("heart-beat", String.valueOf(heartBeat));
-        return new Frame(ClientCommand.CONNECT, headers);
+        return new Frame(Command.CONNECT, headers);
     }
 
     public String serialize() {
@@ -44,25 +44,25 @@ class Frame {
         return sb.toString();
     }
 
-    public Frame(ClientCommand command, Map<String, String> headers, String body) {
+    public Frame(Command command, Map<String, String> headers, String body) {
         this.command = command;
         this.headers = headers;
         this.body = body;
     }
 
-    public Frame(ClientCommand command, String body) {
+    public Frame(Command command, String body) {
         this(command, new HashMap<String, String>(), body);
     }
 
-    public Frame(ClientCommand command) {
+    public Frame(Command command) {
         this(command, "");
     }
 
-    public Frame(ClientCommand command, Map<String, String> headers) {
+    public Frame(Command command, Map<String, String> headers) {
         this(command, headers, "");
     }
 
-    public ClientCommand getCommand() {
+    public Command getCommand() {
         return command;
     }
 
