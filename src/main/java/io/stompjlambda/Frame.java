@@ -62,6 +62,11 @@ class Frame {
         this(command, headers, "");
     }
 
+    @Override
+    public String toString() {
+        return serialize();
+    }
+
     public Command getCommand() {
         return command;
     }
