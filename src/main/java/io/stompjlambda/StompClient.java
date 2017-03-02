@@ -2,12 +2,17 @@ package io.stompjlambda;
 
 import io.stompjlambda.stream.StompStream;
 
+/**
+ * StompClient takes care of the Stomp protocol, using StompStream to send/receive Frame instances.
+ */
+
 public class StompClient implements StompListener {
     public static final String DEFAULT_HOST = "127.0.0.1";
     public static final int DEFAULT_PORT = 61613;
     public static final String DEFAULT_VHOST = "/";
     public static final String DEFAULT_USER = "guest";
     public static final String DEFAULT_PASSCODE = "guest";
+    public static final String STOMP_VERSION = Frame.STOMP_VERSION;
 
     private final String host;
     private final int port;
@@ -17,10 +22,15 @@ public class StompClient implements StompListener {
     private String transport = StompStreamFactory.TRANSPORT_TCP;
 
     private StompStream stompStream;
+    private String server;
+    private boolean connected;
 
     public void connect() throws StompException {
         stompStream = StompStreamFactory.getInstance(transport);
-        stompStream.connect(host, port, "/", user, passcode, 0);
+        stompStream.connect(host, port);
+
+        Frame responseFrame = stompStream.sendReceive(Frame.newConnectFrame(vhost, user, passcode, 30_000));
+        handleConnectedFrame(responseFrame);
     }
 
     public void disconnect() throws StompException {
@@ -29,6 +39,24 @@ public class StompClient implements StompListener {
 
     public void frameReceived(Frame frame) {
         System.out.printf("Received frame! frame=%s %n", frame);
+    }
+
+    private void handleConnectedFrame(Frame frame) throws StompException {
+        switch (frame.getCommand()) {
+            case CONNECTED:
+                assert frame.getHeader("version") == STOMP_VERSION : String.format("Expected STOMP version=%s", STOMP_VERSION);
+                connected = false;
+                server = frame.getHeader("server");
+                break;
+            case ERROR:
+                connected = false;
+                String msg = String.format("Error connecting to STOMP. ERROR: %s. Frame: %s", frame.getBody(), frame);
+                throw new StompException(msg);
+            default:
+                connected = false;
+                msg = String.format("Error connecting to STOMP. Expected CONNECTED, but got unexpected Frame: %s", frame);
+                throw new StompException(msg);
+        }
     }
 
 
@@ -73,7 +101,7 @@ public class StompClient implements StompListener {
     }
 
     public boolean isConnected() {
-        return stompStream.isConnected();
+        return connected;
     }
 
     public void setTransport(String transport) {

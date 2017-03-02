@@ -19,40 +19,15 @@ public class TcpStompStream implements StompStream {
     private boolean connected;
 
     @Override
-    public void connect(String server, int port, String host, String login, String passcode, int heartBeat) throws StompException {
+    public void connect(String server, int port) throws StompException {
         try {
             socketChannel = SocketChannel.open();
             socketChannel.connect(new InetSocketAddress(server, port));
-
-            Frame connectFrame = Frame.newConnectFrame("/", "guest", "guest", 30000);
-            send(connectFrame);
-            Frame responseFrame = receive();
-            handleConnectedFrame(responseFrame);
+            connected = true;
         } catch (IOException e) {
-            String msg = String.format("Error connecting to STOMP %s:%d vhost=%s login=%s/%s heart-beat=%d", server, port, host, login, passcode, heartBeat);
+            connected = false;
+            String msg = String.format("Error connecting to STOMP %s:%d", server, port);
             throw new StompException(msg, e);
-        }
-
-
-    }
-
-    private void handleConnectedFrame(Frame frame) throws StompException {
-
-        switch (frame.getCommand()) {
-            case CONNECTED:
-                String version = Frame.STOMP_VERSION;
-                assert frame.getHeader("version") == version : String.format("Expected STOMP version=%s", version);
-                this.server = frame.getHeader("server");
-                this.connected = true;
-                break;
-            case ERROR:
-                this.connected = false;
-                String msg = String.format("Error connecting to STOMP. ERROR: %s. Frame: %s", frame.getBody(), frame);
-                throw new StompException(msg);
-            default:
-                this.connected = false;
-                msg = String.format("Error connecting to STOMP. Expected CONNECTED, but got unexpected Frame: %s", frame);
-                throw new StompException(msg);
         }
     }
 
@@ -126,7 +101,7 @@ public class TcpStompStream implements StompStream {
     @Override
     public void disconnect() throws StompException {
         try {
-            this.connected = false;
+            connected = false;
             socketChannel.close();
         } catch (IOException e) {
             String msg = String.format("Error disconnecting from STOMP connection: %s:%d", server, port);
