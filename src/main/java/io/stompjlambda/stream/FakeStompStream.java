@@ -7,8 +7,9 @@ import io.stompjlambda.StompException;
 import io.stompjlambda.StompListener;
 
 public class FakeStompStream implements StompStream {
+
     @Override
-    public void connect() throws StompException {
+    public void connect(String server, int port, String host, String login, String passcode, int heartBeat) throws StompException {
         return;
     }
 
@@ -20,5 +21,15 @@ public class FakeStompStream implements StompStream {
     @Override
     public void setListener(StompListener listener) {
         return;
+    }
+
+    @Override
+    public void disconnect() throws StompException {
+        return;
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
     }
 }

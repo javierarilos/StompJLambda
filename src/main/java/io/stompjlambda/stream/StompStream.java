@@ -12,7 +12,10 @@ import io.stompjlambda.StompListener;
  * (https://stomp.github.io/stomp-specification-1.2.html#STOMP_Frames)
  */
 public interface StompStream {
-    public void connect() throws StompException;
-    public void send(Frame frame);
+    public void connect(String server, int port, String host, String login, String passcode, int heartBeat) throws StompException;
+    public void send(Frame frame) throws StompException;
     public void setListener(StompListener listener);
+    public void disconnect() throws StompException;
+
+    boolean isConnected();
 }

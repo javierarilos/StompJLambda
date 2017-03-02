@@ -8,8 +8,8 @@ public class StompClientTest extends TestCase{
 
         assertEquals("somehost", client.getHost());
         assertEquals(9999, client.getPort());
-        assertEquals("someuser", client.getUsr());
-        assertEquals("somepass", client.getPass());
+        assertEquals("someuser", client.getUser());
+        assertEquals("somepass", client.getPasscode());
     }
 
     public void testFakeConnect() throws StompException {

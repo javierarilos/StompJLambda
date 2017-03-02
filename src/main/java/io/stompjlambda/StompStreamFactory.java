@@ -2,6 +2,7 @@ package io.stompjlambda;
 
 import io.stompjlambda.stream.FakeStompStream;
 import io.stompjlambda.stream.StompStream;
+import io.stompjlambda.stream.TcpStompStream;
 
 import java.security.InvalidParameterException;
 
@@ -17,7 +18,7 @@ public class StompStreamFactory {
     public static StompStream getInstance(String transport) {
         switch (transport) {
             case TRANSPORT_TCP:
-                throw new RuntimeException("TRANSPORT_TCP NOT YET IMPLEMENTED.");
+                return new TcpStompStream();
             case TRANSPORT_FAKE:
                 return new FakeStompStream();
             default:

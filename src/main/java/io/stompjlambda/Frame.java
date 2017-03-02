@@ -3,6 +3,7 @@ package io.stompjlambda;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Frame class represents a frame according to the Stomp 1.2 protocol:
@@ -10,18 +11,49 @@ import java.util.TreeMap;
  */
 public class Frame {
     private static final String FRAME_TMPLT = "%s\n%s\n%s\0";
-    private final Command command;
-    private final Map<String, String> headers;
-    private final String body;
+    public static final String STOMP_VERSION = "1.2";
+
+    private Command command;
+    private Map<String, String> headers;
+    private String body;
 
     public static Frame newConnectFrame(String host, String login, String passcode, int heartBeat) {
         Map<String, String> headers = new TreeMap<String, String>();
-        headers.put("accept-version", "1.2");
+        headers.put("accept-version", STOMP_VERSION);
         headers.put("host", host);
         headers.put("login", login);
         headers.put("passcode", passcode);
-        headers.put("heart-beat", String.valueOf(heartBeat));
+        headers.put("heart-beat", "0," + String.valueOf(heartBeat));
         return new Frame(Command.CONNECT, headers);
+    }
+
+    public static Frame newSendFrame(String destination, String body) {
+        return new Frame(Command.SEND, body)
+                .addHeader("destination", destination)
+                .addHeader("content-type", "text/plain"); //for the moment only text msgs are supported
+    }
+
+    public static Frame deserialize(String frameStr) {
+        String[] frameParts = frameStr.split("\n");
+
+        Frame frame = new Frame();
+        frame.command = Command.valueOf(frameParts[0]);
+        boolean pendingHeaders = true;
+        int currPosition = 1;
+        while (pendingHeaders){
+            String currPart = frameParts[currPosition];
+            if (currPart.isEmpty()) { // no more headers
+                pendingHeaders = false;
+            } else {
+                String[] headerParts = currPart.split(":");
+                String header = headerParts[0];
+                String headerValue = headerParts[1];
+                frame.addHeader(header, headerValue);
+            }
+            currPosition++;
+        }
+        frame.body = frameParts[currPosition].replace("\0", "");
+        return frame;
     }
 
     public String serialize() {
@@ -29,9 +61,14 @@ public class Frame {
         return String.format(FRAME_TMPLT, command, serializedHeaders, body);
     }
 
+    public Frame addHeader(String header, String value) {
+        this.headers.put(header, value);
+        return this;
+    }
+
     private String serializeHeaders() {
         StringBuilder sb = new StringBuilder();
-        for(Map.Entry<String, String> entry : headers.entrySet()){
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
             String headerName = entry.getKey();
             String value = entry.getValue();
             sb.append(headerName).append(":").append(value).append("\n");
@@ -53,6 +90,10 @@ public class Frame {
         this(command, "");
     }
 
+    private Frame() {
+        this.headers = new HashMap<String, String>();
+    }
+
     public Frame(Command command, Map<String, String> headers) {
         this(command, headers, "");
     }
@@ -72,5 +113,9 @@ public class Frame {
 
     public String getBody() {
         return body;
+    }
+
+    public String getHeader(String header) {
+        return this.headers.getOrDefault(header, "");
     }
 }
