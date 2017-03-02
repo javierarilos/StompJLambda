@@ -19,6 +19,11 @@ public class FakeStompStream implements StompStream {
     }
 
     @Override
+    public Frame receive() throws StompException {
+        return null;
+    }
+
+    @Override
     public void setListener(StompListener listener) {
         return;
     }

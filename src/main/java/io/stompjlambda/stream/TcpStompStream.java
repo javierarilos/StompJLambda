@@ -38,7 +38,7 @@ public class TcpStompStream implements StompStream {
 
     private void handleConnectedFrame(Frame frame) throws StompException {
 
-        switch (frame.getCommand()){
+        switch (frame.getCommand()) {
             case CONNECTED:
                 String version = Frame.STOMP_VERSION;
                 assert frame.getHeader("version") == version : String.format("Expected STOMP version=%s", version);
@@ -56,7 +56,17 @@ public class TcpStompStream implements StompStream {
         }
     }
 
-    private Frame receive() throws IOException {
+    @Override
+    public Frame receive() throws StompException {
+        try {
+            String inFrameStr = doReceive();
+            return Frame.deserialize(inFrameStr);
+        } catch (IOException e) {
+            throw new StompException("Error receiving STOMP from TCP.", e);
+        }
+    }
+
+    private String doReceive() throws IOException {
         int bytesRead = 0;
         StringBuilder inFrameStrBldr = new StringBuilder();
         ByteBuffer inBuf;
@@ -73,18 +83,15 @@ public class TcpStompStream implements StompStream {
                 bytes = (nullPos == -1) ? bytes : Arrays.copyOf(bytes, nullPos + 1);
                 inFrameStrBldr.append(new String(bytes, "UTF-8"));
                 lastChar = (nullPos == -1) ? inFrameStrBldr.charAt(inFrameStrBldr.length() - 1) : inFrameStrBldr.charAt(nullPos);
-
-                System.out.printf("<<< INTERMEDIATE READ: (%d) lastChar='%c' inFrameStr.length()=%d %n%s%n", bytesRead, lastChar, inFrameStrBldr.length(), inFrameStrBldr.toString());
             }
         } while (lastChar != '\0');
 
         String inFrameStr = inFrameStrBldr.toString();
-        System.out.printf("<<< TOTAL READ:::::: %s %n", inFrameStr);
-        return Frame.deserialize(inFrameStr);
+        return inFrameStr;
     }
 
     private int findNullChar(byte[] bytes, int before) {
-        int nullPos = before-1;
+        int nullPos = before - 1;
         for (; nullPos >= 0; nullPos--) {
             if (bytes[nullPos] == '\0')
                 break;
