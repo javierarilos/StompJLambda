@@ -1,6 +1,8 @@
 package io.stompjlambda;
 
 public enum Command {
+
+    // ----- CLIENT COMMANDS
     SEND("SEND"),
     SUBSCRIBE("SUBSCRIBE"),
     BEGIN("BEGIN"),
@@ -10,7 +12,13 @@ public enum Command {
     NACK("NACK"),
     DISCONNECT("DISCONNECT"),
     CONNECT("CONNECT"),
-    STOMP("STOMP");
+    STOMP("STOMP"),
+
+    // ----- SERVER COMMANDS
+    CONNECTED("CONNECTED"),
+    MESSAGE("MESSAGE"),
+    RECEIPT("RECEIPT"),
+    ERROR("ERROR");
 
     private final String command;
 
