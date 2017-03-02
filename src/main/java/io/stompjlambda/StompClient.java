@@ -24,6 +24,7 @@ public class StompClient implements StompListener {
     private StompStream stompStream;
     private String server;
     private boolean connected;
+    private String session;
 
     public void connect() throws StompException {
         stompStream = StompStreamFactory.getInstance(transport);
@@ -34,7 +35,21 @@ public class StompClient implements StompListener {
     }
 
     public void disconnect() throws StompException {
+        String receipt = session+"-disconnect";
+        Frame responseFrame = stompStream.sendReceive(Frame.newDisconnectFrame(receipt));
+        handleDisconnectedFrame(responseFrame);
+        connected = false;
         stompStream.disconnect();
+    }
+
+    private void handleDisconnectedFrame(Frame frame) throws StompException {
+        switch (frame.getCommand()) {
+            case RECEIPT:
+                System.out.printf("---- Server (%s) disconnected stomp OK%n", server);
+                break;
+            default:
+                throw new StompException(String.format("Didn't receive OK disconnect from server: %s, frame: %n%s%n", server, frame));
+        }
     }
 
     public void frameReceived(Frame frame) {
@@ -45,8 +60,11 @@ public class StompClient implements StompListener {
         switch (frame.getCommand()) {
             case CONNECTED:
                 assert frame.getHeader("version") == STOMP_VERSION : String.format("Expected STOMP version=%s", STOMP_VERSION);
-                connected = false;
+
+                connected = true;
                 server = frame.getHeader("server");
+                session = frame.getHeader("session");
+                System.out.printf("---- Server (%s) connected stomp OK%n", server);
                 break;
             case ERROR:
                 connected = false;

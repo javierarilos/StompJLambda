@@ -27,6 +27,11 @@ public class Frame {
         return new Frame(Command.CONNECT, headers);
     }
 
+    public static Frame newDisconnectFrame(String receipt) {
+        return new Frame(Command.DISCONNECT)
+                .addHeader("receipt", receipt);
+    }
+
     public static Frame newSendFrame(String destination, String body) {
         return new Frame(Command.SEND, body)
                 .addHeader("destination", destination)
